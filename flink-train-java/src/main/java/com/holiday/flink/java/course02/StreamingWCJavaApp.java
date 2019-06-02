@@ -13,6 +13,7 @@ import org.apache.flink.util.Collector;
  * wc统计的数据我们源自于socker
  */
 public class StreamingWCJavaApp {
+
     public static void main(String[] args) throws Exception {
         // step1:获取执行环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
