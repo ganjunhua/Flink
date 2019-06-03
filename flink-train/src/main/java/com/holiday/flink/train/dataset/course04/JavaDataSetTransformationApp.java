@@ -1,19 +1,76 @@
 package com.holiday.flink.train.dataset.course04;
 
 import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.MapPartitionFunction;
+import org.apache.flink.api.common.operators.Order;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.operators.DataSource;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.util.Collector;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class JavaDataSetTransformationApp {
+
     public static void main(String[] args) throws Exception {
         final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-        mapPartitonFunction(env);
+        distinctFunction(env);
+    }
+
+    public static void distinctFunction(ExecutionEnvironment env) throws Exception {
+        List<String> info = new ArrayList<String>();
+        info.add("hadoop,spark");
+        info.add("hadoop,spark");
+        info.add("hadoop,flink");
+        DataSource data = env.fromCollection(info);
+        data.flatMap(new FlatMapFunction<String, String>() {
+
+            public void flatMap(String s, Collector<String> collector) throws Exception {
+                for (String value : s.split(",")) {
+                    collector.collect(value);
+                }
+            }
+        }).distinct().print();
+    }
+
+    public static void flatMapFunction(ExecutionEnvironment env) throws Exception {
+        List<String> info = new ArrayList<String>();
+        info.add("hadoop,spark");
+        info.add("hadoop,spark");
+        info.add("hadoop,flink");
+        DataSource data = env.fromCollection(info);
+        // wordcount
+        data.flatMap(new FlatMapFunction<String, String>() {
+            public void flatMap(String s, Collector<String> collector) throws Exception {
+                String[] inputs = s.split(",");
+                for (String input : inputs) {
+                    collector.collect(input);
+                }
+            }
+        }).map(new MapFunction<String, Tuple2<String, Integer>>() {
+            public Tuple2<String, Integer> map(String s) throws Exception {
+                return new Tuple2<String, Integer>(s, 1);
+            }
+        }).groupBy(0).sum(1).print();
+    }
+
+    public static void firstFunction(ExecutionEnvironment env) throws Exception {
+        List<Tuple2<Integer, String>> info = new ArrayList<Tuple2<Integer, String>>();
+        info.add(new Tuple2(1, "hadoop"));
+        info.add(new Tuple2(1, "spark"));
+        info.add(new Tuple2(1, "flink"));
+        info.add(new Tuple2(2, "java"));
+        info.add(new Tuple2(2, "spring boot"));
+        info.add(new Tuple2(3, "linux"));
+        info.add(new Tuple2(4, "vue"));
+        DataSource data = env.fromCollection(info);
+        data.first(3).print();
+        data.groupBy(0).first(2).print();
+        data.groupBy(0).sortGroup(1, Order.DESCENDING).first(2).print();
     }
 
     public static void mapPartitonFunction(ExecutionEnvironment env) throws Exception {

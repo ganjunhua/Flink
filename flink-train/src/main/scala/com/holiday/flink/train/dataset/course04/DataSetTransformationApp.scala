@@ -1,5 +1,6 @@
 package com.holiday.flink.train.dataset.course04
 
+import org.apache.flink.api.common.operators.Order
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.api.scala._
 
@@ -8,7 +9,71 @@ import scala.collection.mutable.ListBuffer
 object DataSetTransformationApp {
   def main(args: Array[String]): Unit = {
     val env = ExecutionEnvironment.getExecutionEnvironment
-    mapPartitionFunction(env)
+    joinFunction(env)
+  }
+
+  def joinFunction(env: ExecutionEnvironment): Unit = {
+
+    //  编号---姓名
+    val info1 = ListBuffer[(Int, String)]()
+    info1.append((1, "h1"))
+    info1.append((2, "h2"))
+    info1.append((3, "h3"))
+    info1.append((4, "h4"))
+    // 编号---城市
+    val info2 = ListBuffer[(Int, String)]()
+    info2.append((1, "bj"))
+    info2.append((2, "sh"))
+    info2.append((3, "gz"))
+    info2.append((5, "sz"))
+    // join where(0) 0 为 data1，第一个Input, equalTo(0) 0 为第二个data2 Input,
+    // 多个条件关系什么 逗号分隔
+    val data1 = env.fromCollection(info1)
+    val data2 = env.fromCollection(info2)
+    //join结果为 ((3,h3),(3,gz))  ((1,h1),(1,bj))
+    // 使用apply 处理 每个 无组  first =  (3,h3)  ，second =(3,gz)
+    data1.join(data2).where(0).equalTo(0).apply((first, second) => {
+      (first._1, first._2, second._2)
+    }).print()
+  }
+
+  def distinctFunction(env: ExecutionEnvironment): Unit = {
+    val info = ListBuffer[String]()
+    info.append("hadoop,spark")
+    info.append("hadoop,spark")
+    info.append("hadoop.flink")
+    val data = env.fromCollection(info)
+    //去重
+    data.flatMap(_.split(",")).distinct().print()
+  }
+
+  def flatMapFunction(env: ExecutionEnvironment): Unit = {
+    val info = ListBuffer[String]()
+    info.append("hadoop,spark")
+    info.append("hadoop,flink")
+    info.append("flink,flink")
+    val data = env.fromCollection(info)
+    //将data 数据打散，行转列,wordcount
+    data.flatMap(_.split(",")).map((_, 1)).groupBy(0).sum(1).print()
+  }
+
+  def firstFunction(env: ExecutionEnvironment): Unit = {
+    val info = ListBuffer[(Int, String)]()
+    info.append((1, "hadoop"))
+    info.append((1, "spark"))
+    info.append((1, "flink"))
+    info.append((2, "java"))
+    info.append((2, "spring boot"))
+    info.append((3, "linux"))
+    info.append((4, "vue"))
+
+    val data = env.fromCollection(info)
+    // 取前三条数据
+    data.first(3).print()
+    //分组后取前两条数据，等于sql中 rownumber order by
+    data.groupBy(0).first(2).print()
+    //分组后取前两条数据，等于sql中 rownumber partition by order by
+    data.groupBy(0).sortGroup(1, Order.DESCENDING).first(2).print()
   }
 
   def mapPartitionFunction(env: ExecutionEnvironment): Unit = {
