@@ -1,13 +1,11 @@
 package com.holiday.flink.train.dataset.course04;
 
-import org.apache.flink.api.common.functions.FilterFunction;
-import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.MapPartitionFunction;
+import org.apache.flink.api.common.functions.*;
 import org.apache.flink.api.common.operators.Order;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.operators.DataSource;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.util.Collector;
 
 
@@ -18,7 +16,37 @@ public class JavaDataSetTransformationApp {
 
     public static void main(String[] args) throws Exception {
         final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-        distinctFunction(env);
+        crossFunction(env);
+    }
+
+    public static void crossFunction(ExecutionEnvironment env) throws Exception {
+        // 笛卡尔集
+        List<String> info = new ArrayList<String>();
+        info.add("曼联");
+        info.add("曼城");
+        List<String> info2 = new ArrayList<String>();
+        info2.add("3");
+        info2.add("1");
+        info2.add("0");
+        DataSource data1 = env.fromCollection(info);
+        DataSource data2 = env.fromCollection(info2);
+        data1.cross(data2).print();
+    }
+
+    public static void joinFunction(ExecutionEnvironment env) throws Exception {
+        List<Tuple2<Integer, String>> info1 = new ArrayList<Tuple2<Integer, String>>();
+        info1.add(new Tuple2<Integer, String>(1, "h1"));
+        info1.add(new Tuple2<Integer, String>(2, "h2"));
+        info1.add(new Tuple2<Integer, String>(3, "h3"));
+        info1.add(new Tuple2<Integer, String>(4, "h4"));
+        List<Tuple2<Integer, String>> info2 = new ArrayList<Tuple2<Integer, String>>();
+        info2.add(new Tuple2<Integer, String>(1, "bj"));
+        info2.add(new Tuple2<Integer, String>(2, "sh"));
+        info2.add(new Tuple2<Integer, String>(3, "gz"));
+        info2.add(new Tuple2<Integer, String>(5, "sz"));
+        DataSource data1 = env.fromCollection(info1);
+        DataSource data2 = env.fromCollection(info2);
+        data1.join(data2).where(0).equalTo(0).print();
     }
 
     public static void distinctFunction(ExecutionEnvironment env) throws Exception {

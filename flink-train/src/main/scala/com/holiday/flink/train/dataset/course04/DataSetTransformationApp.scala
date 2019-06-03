@@ -9,11 +9,44 @@ import scala.collection.mutable.ListBuffer
 object DataSetTransformationApp {
   def main(args: Array[String]): Unit = {
     val env = ExecutionEnvironment.getExecutionEnvironment
-    joinFunction(env)
+    crossFunction(env)
+  }
+
+  def crossFunction(env: ExecutionEnvironment): Unit = {
+    //cross 笛卡尔集
+    val info = List("曼联", "曼城")
+    val info2 = List(3, 1, 0)
+    val data1 = env.fromCollection(info)
+    val data2 = env.fromCollection(info2)
+    data1.cross(data2).print()
+  }
+
+  def outJoinFunction(env: ExecutionEnvironment): Unit = {
+
+    //  编号---姓名
+    val info1 = ListBuffer[(Int, String)]()
+    info1.append((1, "h1"))
+    info1.append((2, "h2"))
+    info1.append((3, "h3"))
+    info1.append((4, "h4"))
+    // 编号---城市
+    val info2 = ListBuffer[(Int, String)]()
+    info2.append((1, "bj"))
+    info2.append((2, "sh"))
+    info2.append((3, "gz"))
+    info2.append((5, "sz"))
+    // join where(0) 0 为 data1，第一个Input, equalTo(0) 0 为第二个data2 Input,
+    // 多个条件关系什么 逗号分隔
+    val data1 = env.fromCollection(info1)
+    val data2 = env.fromCollection(info2)
+    //join结果为 ((3,h3),(3,gz))  ((1,h1),(1,bj))
+    // 使用apply 处理 每个 无组  first =  (3,h3)  ，second =(3,gz)
+    data1.leftOuterJoin(data2).where(0).equalTo(0).apply((first, second) => {
+      if (second == null) (first._1, first._2, "-") else (first._1, first._2, second._2)
+    }).print()
   }
 
   def joinFunction(env: ExecutionEnvironment): Unit = {
-
     //  编号---姓名
     val info1 = ListBuffer[(Int, String)]()
     info1.append((1, "h1"))
