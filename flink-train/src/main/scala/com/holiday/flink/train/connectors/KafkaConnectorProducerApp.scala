@@ -17,7 +17,7 @@ object KafkaConnectorProducerApp {
     val data = env.socketTextStream("holiday-1", 9999)
     val topic = "flink"
     val properties = new Properties()
-    properties.setProperty("bootstrap.servers", "holiday-1:9092")
+    properties.setProperty("bootstrap.servers", "holiday-3:9092")
     //创建 kafkaSink
     val kafkaSink = new FlinkKafkaProducer[String](topic,
       new KeyedSerializationSchemaWrapper[String](new SimpleStringSchema()), properties)

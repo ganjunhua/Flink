@@ -32,7 +32,7 @@ object KafkaConnectorConsumerApp {
     //定义properties
     val properties = new Properties()
     //设置 properties 的 zk  与消费组
-    properties.setProperty("bootstrap.servers", "holiday-1:9092")
+    properties.setProperty("bootstrap.servers", "holiday-3:9092")
     properties.setProperty("group.id", "testFlink")
     //创建 kafka消费者
     //设置数据来源，FlinkKafkaConsumer [string kafka里面的数据类型]

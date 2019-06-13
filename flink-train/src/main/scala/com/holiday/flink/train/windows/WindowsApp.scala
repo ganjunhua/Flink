@@ -12,9 +12,9 @@ object WindowsApp {
     */
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    val text = env.socketTextStream("holiday-7-1", 9999)
+    val text = env.socketTextStream("holiday-1", 9999)
     text.flatMap(_.split(",")).map((_, 1)).keyBy(0)
-      // .timeWindow(Time.seconds(5))
+       .timeWindow(Time.seconds(5))
       //.timeWindow(Time.seconds(2), Time.seconds(1))
       .sum(1)
       .print()
