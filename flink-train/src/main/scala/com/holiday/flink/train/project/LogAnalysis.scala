@@ -1,7 +1,6 @@
 package com.holiday.flink.train.project
 
 import java.text.SimpleDateFormat
-import java.util
 import java.util.{Date, Properties}
 
 import org.apache.flink.api.common.functions.RuntimeContext
@@ -123,7 +122,7 @@ object LogAnalysis {
           json.put("traffics", element._3)
           val id = element._1 + "-" + element._2
           return Requests.indexRequest()
-            .index("holiday") //定义 索引的名称
+            .index("holiday2") //定义 索引的名称
             .id(id) //主键
             .`type`("traffic") // 定义 索引的type
             .source(json) // 写入数据
