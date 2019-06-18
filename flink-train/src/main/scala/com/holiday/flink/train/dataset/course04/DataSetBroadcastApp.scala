@@ -5,7 +5,6 @@ import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.api.scala._
 import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
 
 object DataSetBroadcastApp {
   def main(args: Array[String]): Unit = {
