@@ -5,14 +5,18 @@
   <version>1.0-SNAPSHOT</version>
   <inceptionYear>2008</inceptionYear>
   <properties>
-    <scala.version>2.11.8</scala.version>
+    <flink.version>1.7.0</flink.version>
+    <scala.binary.version>2.11</scala.binary.version>
+    <scala.version>2.11.12</scala.version>
+    <java.version>1.8</java.version>
+    <scala.binary.version>2.11</scala.binary.version>
   </properties>
 
   <repositories>
     <repository>
-      <id>scala-tools.org</id>
-      <name>Scala-Tools Maven2 Repository</name>
-      <url>http://scala-tools.org/repo-releases</url>
+      <id>nexus-aliyun</id>
+      <name>Nexus aliyun</name>
+      <url>http://maven.aliyun.com/nexus/content/groups/public</url>
     </repository>
   </repositories>
 
@@ -25,6 +29,30 @@
   </pluginRepositories>
 
   <dependencies>
+    <!-->flink java <-->
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-java</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+    <!--> flink scala<-->
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-scala_${scala.binary.version}</artifactId>
+          <version>${flink.version}</version>
+          <scope>provided</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
+          <version>${flink.version}</version>
+          <scope>provided</scope>
+      </dependency>
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
