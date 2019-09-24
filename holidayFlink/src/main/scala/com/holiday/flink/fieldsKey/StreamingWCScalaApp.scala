@@ -6,7 +6,7 @@ import org.apache.flink.streaming.api.windowing.time.Time
 
 object StreamingWCScalaApp {
 
-  //定义class，即定义表字段
+  //定义class，即定义表字段 
   case class WC(word: String, count: Int)
 
   def main(args: Array[String]): Unit = {
