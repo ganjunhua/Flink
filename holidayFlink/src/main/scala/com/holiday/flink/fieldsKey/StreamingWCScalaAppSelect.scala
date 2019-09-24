@@ -16,8 +16,8 @@ object StreamingWCScalaApp {
     val words = text.flatMap(_.split(","))
       //将结果放入类中
       .map(WC(_, 1))
-      // 使用字段进行分组
-      .keyBy("word")
+      // 使用select 字段进行分组
+      .keyBy(x => x.word)
       .timeWindow(Time.seconds(5))
       // 使用字段进行分组
       .sum("count")
