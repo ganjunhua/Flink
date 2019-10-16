@@ -10,6 +10,7 @@ import org.apache.flink.util.Collector;
 
 public class BatchWCJavaAPp {
     public static void main(String[] args) throws Exception {
+
         String input = "data/wc";
         // 1、得到上下文
         ExecutionEnvironment evn = ExecutionEnvironment.getExecutionEnvironment();

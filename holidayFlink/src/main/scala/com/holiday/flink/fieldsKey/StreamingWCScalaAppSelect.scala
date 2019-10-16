@@ -4,7 +4,7 @@ import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.windowing.time.Time
 
-object StreamingWCScalaApp {
+object StreamingWCScalaApp1 {
 
   //定义class，即定义表字段
   case class WC(word: String, count: Int)
