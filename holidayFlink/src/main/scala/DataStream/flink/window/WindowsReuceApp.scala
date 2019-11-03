@@ -4,7 +4,7 @@ import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.windowing.time.Time
 
-object WindowsReduceApp {
+object WindowsReduceApp1 {
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     val text = env.socketTextStream("192.168.226.128", 9999)
