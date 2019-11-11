@@ -1,8 +1,10 @@
 package com.holiday.project
 
 import java.text.SimpleDateFormat
-import java.util.Properties
+import java.util
+import java.util.{Date, Properties}
 
+import org.apache.flink.api.common.functions.RuntimeContext
 import org.apache.flink.api.common.serialization.SimpleStringSchema
 import org.apache.flink.api.java.tuple.Tuple
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
@@ -14,8 +16,15 @@ import org.apache.flink.streaming.api.scala.function.WindowFunction
 import org.apache.flink.streaming.api.watermark.Watermark
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow
+import org.apache.flink.streaming.connectors.elasticsearch.{ElasticsearchSinkFunction, RequestIndexer}
+import org.apache.flink.streaming.connectors.elasticsearch6.ElasticsearchSink
 import org.apache.flink.util.Collector
+import org.apache.http.HttpHost
+import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.client.Requests
 import org.slf4j.LoggerFactory
+
+import scala.collection.mutable.ArrayBuffer
 
 object LogAnalysis {
   //在生产中记录日志建议采用这种方式
@@ -31,6 +40,7 @@ object LogAnalysis {
     properties.setProperty("group.id", "test-group")
     //创建接收者
     val consumer = new FlinkKafkaConsumer[String](topic, new SimpleStringSchema(), properties)
+    consumer.setStartFromLatest()
     //接收kafka的数据
     val data = env.addSource(consumer)
 
@@ -62,7 +72,7 @@ object LogAnalysis {
 
     // logData.print().setParallelism(1)
     // 使用水印 = logData 1573203524000,www.mysql.com,8897
-    logData.assignTimestampsAndWatermarks(new AssignerWithPeriodicWatermarks[(Long, String, Long)] {
+    val esData = logData.assignTimestampsAndWatermarks(new AssignerWithPeriodicWatermarks[(Long, String, Long)] {
       //最大的一个无序的容忍时间 ，即等待时间
       val maxOutOfOrderness = 3500L // 3.5 seconds
       //当前最大的时间
@@ -82,8 +92,8 @@ object LogAnalysis {
       }
     }).keyBy(1)
       .timeWindow(Time.seconds(60))
-      .apply(new WindowFunction[(Long, String, Long), (Long, String, Long), Tuple, TimeWindow] {
-        override def apply(key: Tuple, window: TimeWindow, input: Iterable[(Long, String, Long)], out: Collector[(Long, String, Long)]): Unit = {
+      .apply(new WindowFunction[(Long, String, Long), (String, String, Long), Tuple, TimeWindow] {
+        override def apply(key: Tuple, window: TimeWindow, input: Iterable[(Long, String, Long)], out: Collector[(String, String, Long)]): Unit = {
           /**
             * 第一个参数：这一分钟的时间
             * 第二个参数：域名
@@ -92,14 +102,44 @@ object LogAnalysis {
           val domain = key.getField(0).toString
           var sum = 0L
           val iterator = input.iterator
+          val times = ArrayBuffer[Long]()
           while (iterator.hasNext) {
             val next = iterator.next()
             sum += next._3
+            times.append(next._1)
           }
-          out.collect(1,domain,sum)
+          val time = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date(times.max))
+          out.collect((time, domain, sum))
+        }
+      })
+
+    val httpHosts = new util.ArrayList[HttpHost]()
+    httpHosts.add(new HttpHost("192.168.226.128", 9200, "http"))
+    val esSinkBuilder = new ElasticsearchSink.Builder[(String, String, Long)](
+      httpHosts,
+
+      new ElasticsearchSinkFunction[(String, String, Long)] {
+        def createIndexRequest(element: (String, String, Long)): IndexRequest = {
+          val json = new java.util.HashMap[String, Any]
+          json.put("time", element._1)
+          json.put("domain", element._2)
+          json.put("traffic", element._3)
+          val id = element._1 + "-" + element._2
+          return Requests.indexRequest()
+            .index("holiday")
+            .`type`("traffic")
+            .id(id)
+            .source(json)
         }
 
-      }).print()
+        override def process(t: (String, String, Long), ctx: RuntimeContext, indexer: RequestIndexer) = {
+          indexer.add(createIndexRequest(t))
+        }
+      }
+    )
+    esSinkBuilder.setBulkFlushMaxActions(1)
+    esData.addSink(esSinkBuilder.build())
+
 
     env.execute(this.getClass.getName)
   }

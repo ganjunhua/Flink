@@ -71,6 +71,21 @@
             <version>${flink.version}</version>
         </dependency>
 
+        <!-- Apache elasticsearch6_2.11 Connector elasticsearch-6.5.4 版本需要增加
+        org.apache.httpcomponents  httpmime  4.5.9依赖
+        -->
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.5.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-elasticsearch6_2.11</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+        <!-- Apache mysql-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
