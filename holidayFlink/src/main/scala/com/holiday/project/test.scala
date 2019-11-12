@@ -1,12 +1,15 @@
 package com.holiday.project
 
-import java.text.SimpleDateFormat
-import java.util.Date
+import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.api.scala._
+
 object test {
   def main(args: Array[String]): Unit = {
 
-    val a = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date("2019-11-08 16:33:19"))
-    println(a)
+    val env = StreamExecutionEnvironment.getExecutionEnvironment
+    val data = env.addSource(new MysqlSource()).setParallelism(1)
+    data.print().setParallelism(1)
 
+    env.execute("xx")
   }
 }

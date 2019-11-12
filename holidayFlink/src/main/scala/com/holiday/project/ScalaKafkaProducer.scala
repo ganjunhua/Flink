@@ -49,7 +49,6 @@ object ScalaKafkaProducer {
     domains += "www.mysql.com"
     domains += "www.oarcle.com"
     domains += "www.scala.com"
-    domains += "www.java.com"
     domains(new Random().nextInt(domains.length))
   }
 
