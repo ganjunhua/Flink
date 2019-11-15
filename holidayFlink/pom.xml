@@ -71,6 +71,19 @@
             <version>${flink.version}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.neo4j.driver/neo4j-java-driver -->
+        <dependency>
+            <groupId>org.neo4j.driver</groupId>
+            <artifactId>neo4j-java-driver</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.neo4j/neo4j -->
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+
         <!-- Apache elasticsearch6_2.11 Connector elasticsearch-6.5.4 版本需要增加
         org.apache.httpcomponents  httpmime  4.5.9依赖
         -->
