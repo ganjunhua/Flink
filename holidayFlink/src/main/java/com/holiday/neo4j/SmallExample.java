@@ -1,9 +1,13 @@
 package com.holiday.neo4j;
 
-import org.apache.flink.client.cli.SavepointOptions;
+
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.types.Node;
+import org.neo4j.driver.v1.types.Path;
+import org.neo4j.driver.v1.types.Relationship;
 
+
+import java.util.Iterator;
 import java.util.List;
 
 import static org.neo4j.driver.v1.Values.parameters;
@@ -94,7 +98,7 @@ public class SmallExample {
         try (Session session = driver.session()) {
             // Auto-commit transactions are a quick and easy way to wrap a read.
             StatementResult result = session.run(
-                    "MATCH p=(b:Holiday)-[]-(c) RETURN p ");
+                    "MATCH p=(b:Holiday)-[]->(c) RETURN p ");
             // Each Cypher execution returns a stream of records.
             //循环每行数据
             while (result.hasNext()) {
@@ -105,15 +109,29 @@ public class SmallExample {
                 //获取每行数据的(node<38>)  Record<{a: node<38>}>
                 List<Value> list = record.values();
                 for (Value v : list) {
-                    Node n = v.asNode();
-                    //获取label
-                    String label = n.labels().iterator().next();
-                    // 获取数据的伪id
-                    Long id = n.id();
-                    // 循环获取每行数据的属性
-                    for (String s : n.keys()) {
-                        //通过key 获取属性值
-                        System.out.println(n.get(s));
+                    //转为关系
+                    Path path = v.asPath();
+                    //获取关系内容
+                    Node start = path.start();
+                    Node end = path.end();
+                    //得到关系开始的 属性值
+                    for (String k : start.keys()) {
+                        System.out.println("start----" + start.get(k));
+                    }
+                    //得到关系
+                    Iterator<Relationship> i = path.relationships().iterator();
+                    while (i.hasNext()) {
+                        // 得到关系 id i.next()
+                        //   System.out.println(i.next());
+                        //得到关系名称 Friend r.type()
+                        Relationship r = i.next();
+                        System.out.println(r.type());
+                        // 得到关系的指向，从谁到谁,id
+                        System.out.println(r.startNodeId() + "---->" + r.endNodeId());
+                    }
+                    //得到关系结束的 属性值
+                    for (String k : end.keys()) {
+                        System.out.println("end----" + end.get(k));
                     }
                 }
             }
